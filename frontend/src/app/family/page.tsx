@@ -117,6 +117,10 @@ export default function FamilyDashboard() {
                 {pendingAlerts.length} Need Review
               </span>
             )}
+            <button onClick={() => router.push('/family/fraud-detection')}
+              className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors">
+              🔍 Fraud Detection
+            </button>
             <button onClick={logout} className="text-green-200 hover:text-white text-sm">Sign Out</button>
           </div>
         </div>

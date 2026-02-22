@@ -137,6 +137,10 @@ export default function SeniorDashboard() {
                 {pendingCount} Alert{pendingCount > 1 ? 's' : ''}
               </span>
             )}
+            <button onClick={() => router.push('/senior/fraud-detection')}
+              className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors">
+              🔍 Fraud Detection
+            </button>
             <button onClick={() => setShowTxnForm(true)}
               className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors">
               + Test Transaction
