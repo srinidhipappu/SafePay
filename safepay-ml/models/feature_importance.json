@@ -1,0 +1,19 @@
+{
+  "is_new_merchant": 0.857504799658754,
+  "is_new_mcc": 0.857504799658754,
+  "is_new_city": 0.857504799658754,
+  "risk_signal_count": 0.7007054075535982,
+  "mcc_freq_score": 0.4637333075769667,
+  "is_above_p95": 0.29430577229209076,
+  "amount_zscore": 0.22369871037864753,
+  "amount_ratio": 0.21565401681815047,
+  "rolling_7d_total": 0.08684078485236156,
+  "is_unusual_hour": 0.08652760278713682,
+  "is_unusual_for_user": 0.06674687623433859,
+  "is_weekend": 0.030339213369687413,
+  "hour_of_day": 0.028733402451592144,
+  "rolling_7d_count": 0.0125910791250772,
+  "velocity_1h": 0.00828293004808797,
+  "is_high_risk_mcc": 0.0,
+  "is_normal_senior_mcc": 0.0
+}

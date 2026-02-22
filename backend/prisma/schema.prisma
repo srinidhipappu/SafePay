@@ -1,0 +1,165 @@
+// SafePay Family - Prisma Database Schema
+// Run: npx prisma db push && npx prisma generate
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Users ───────────────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(SENIOR)
+  phone        String?
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Senior-specific
+  accountBalance  Float?   @default(12450.00)
+  protectionMode  Boolean  @default(true)
+  riskThreshold   Float    @default(0.5)   // alert threshold
+
+  // Relations
+  transactions    Transaction[]
+  alertsAsSubject Alert[]         @relation("AlertSenior")
+  trustedByMe     TrustedLink[]   @relation("SeniorLinks")    // senior's family
+  isTrustedFor    TrustedLink[]   @relation("FamilyLinks")    // family's seniors
+  approvals       Approval[]
+  deviceTokens    DeviceToken[]
+
+  @@map("users")
+}
+
+enum Role {
+  SENIOR
+  FAMILY
+}
+
+// ─── Trusted Circle ───────────────────────────────────────────────────────────
+
+model TrustedLink {
+  id        String            @id @default(uuid())
+  seniorId  String
+  familyId  String
+  status    TrustedLinkStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+
+  senior    User @relation("SeniorLinks", fields: [seniorId], references: [id])
+  family    User @relation("FamilyLinks", fields: [familyId], references: [id])
+
+  @@unique([seniorId, familyId])
+  @@map("trusted_links")
+}
+
+enum TrustedLinkStatus {
+  PENDING
+  ACTIVE
+  REVOKED
+}
+
+// ─── Transactions ─────────────────────────────────────────────────────────────
+
+model Transaction {
+  id         String   @id @default(uuid())
+  userId     String
+  amount     Float
+  merchant   String
+  mcc        String
+  mccDesc    String
+  city       String
+  deviceId   String?
+  timestamp  DateTime @default(now())
+  authorized Boolean  @default(true)
+
+  // Risk data from ML service
+  riskScore        Float?
+  riskLevel        String?   // LOW | MEDIUM | HIGH | CRITICAL
+  anomalyScore     Float?
+  fraudProbability Float?
+  riskFlags        Json?     // array of flag objects
+  scoredAt         DateTime?
+
+  user   User    @relation(fields: [userId], references: [id])
+  alert  Alert?
+
+  @@index([userId, timestamp])
+  @@map("transactions")
+}
+
+// ─── Alerts ──────────────────────────────────────────────────────────────────
+
+model Alert {
+  id            String      @id @default(uuid())
+  seniorId      String
+  transactionId String      @unique
+  status        AlertStatus @default(PENDING)
+
+  // Gemini explanation
+  aiSummary  String?
+  aiReasons  Json?     // string[]
+  aiAction   String?
+
+  // Fallback if Gemini fails
+  usedFallback Boolean @default(false)
+
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+
+  senior      User        @relation("AlertSenior", fields: [seniorId], references: [id])
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+  approvals   Approval[]
+
+  @@index([seniorId, status])
+  @@map("alerts")
+}
+
+enum AlertStatus {
+  PENDING
+  APPROVED
+  DENIED
+  EXPIRED
+}
+
+// ─── Approvals ────────────────────────────────────────────────────────────────
+
+model Approval {
+  id        String         @id @default(uuid())
+  alertId   String
+  userId    String
+  decision  ApprovalDecision
+  note      String?
+  createdAt DateTime       @default(now())
+
+  alert Alert @relation(fields: [alertId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@map("approvals")
+}
+
+enum ApprovalDecision {
+  APPROVED
+  DENIED
+}
+
+// ─── Device Tokens ────────────────────────────────────────────────────────────
+
+model DeviceToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  platform  String   @default("web")
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("device_tokens")
+}

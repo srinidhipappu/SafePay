@@ -1,0 +1,1 @@
+["amount_ratio", "amount_zscore", "is_above_p95", "rolling_7d_total", "rolling_7d_count", "is_new_merchant", "is_new_mcc", "is_high_risk_mcc", "is_normal_senior_mcc", "mcc_freq_score", "hour_of_day", "is_weekend", "is_unusual_hour", "is_unusual_for_user", "velocity_1h", "is_new_city", "risk_signal_count"]
